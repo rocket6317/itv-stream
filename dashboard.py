@@ -1,5 +1,6 @@
 import time
 import logging
+import difflib
 
 logger = logging.getLogger(__name__)
 
@@ -17,8 +18,28 @@ def record_link(channel: str, new_url: str):
             "timestamp": timestamp
         })
 
+def highlight_diff(old: str, new: str) -> str:
+    diff = difflib.ndiff(old, new)
+    result = ""
+    for part in diff:
+        if part.startswith("+ "):
+            result += f"<b style='color:red'>{part[2:]}</b>"
+        elif part.startswith("  "):
+            result += part[2:]
+    return result
+
 def get_dashboard_data():
-    return {
+    data = {
         "latest": latest_links,
-        "history": link_history
+        "history": {},
+        "diffs": {}
     }
+    for channel, history in link_history.items():
+        data["history"][channel] = history
+        if len(history) >= 2:
+            old = history[-2]["url"]
+            new = history[-1]["url"]
+            data["diffs"][channel] = highlight_diff(old, new)
+        else:
+            data["diffs"][channel] = f"<b>{history[-1]['url']}</b>"
+    return data
