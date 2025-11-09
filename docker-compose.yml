@@ -1,0 +1,7 @@
+version: '3.8'
+
+services:
+  itv:
+    build: .
+    ports:
+      - "1995:8000"
