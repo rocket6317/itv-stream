@@ -32,10 +32,12 @@ def get_dashboard_data():
     data = {
         "latest": latest_links,
         "history": {},
-        "diffs": {}
+        "diffs": {},
+        "counts": {}
     }
     for channel, history in link_history.items():
         data["history"][channel] = history
+        data["counts"][channel] = len(history)
         if len(history) >= 2:
             old = history[-2]["url"]
             new = history[-1]["url"]
