@@ -1,6 +1,7 @@
 import time
 import logging
 import difflib
+from datetime import datetime
 
 logger = logging.getLogger(__name__)
 
@@ -33,11 +34,20 @@ def get_dashboard_data():
         "latest": latest_links,
         "history": {},
         "diffs": {},
-        "counts": {}
+        "counts": {},
+        "elapsed": {}
     }
+    now = datetime.now()
     for channel, history in link_history.items():
         data["history"][channel] = history
         data["counts"][channel] = len(history)
+
+        last_time = datetime.strptime(history[-1]["timestamp"], "%Y-%m-%d %H:%M:%S")
+        delta = now - last_time
+        hours, remainder = divmod(delta.total_seconds(), 3600)
+        minutes, _ = divmod(remainder, 60)
+        data["elapsed"][channel] = f"{int(hours)}h {int(minutes)}m ago"
+
         if len(history) >= 2:
             old = history[-2]["url"]
             new = history[-1]["url"]
