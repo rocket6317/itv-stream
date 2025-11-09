@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>ITV Redirect Dashboard</title>
+  <style>
+    body { font-family: Arial; padding: 20px; background: #f9f9f9; }
+    h1 { color: #333; }
+    table { border-collapse: collapse; width: 100%; margin-top: 20px; }
+    th, td { border: 1px solid #ccc; padding: 8px; text-align: left; }
+    th { background-color: #eee; }
+    .channel { font-weight: bold; }
+  </style>
+</head>
+<body>
+  <h1>ITV Redirect Dashboard</h1>
+  <div id="dashboard"></div>
+
+  <script>
+    async function loadDashboard() {
+      const res = await fetch("/dashboard/json");
+      const data = await res.json();
+      const container = document.getElementById("dashboard");
+
+      let html = "<table><tr><th>Channel</th><th>Current URL</th><th>Change History</th></tr>";
+      for (const [channel, url] of Object.entries(data.latest)) {
+        const history = data.history[channel] || [];
+        const historyHtml = history.map(h => `<div>${h.timestamp}<br><code>${h.url}</code></div>`).join("<hr>");
+        html += `<tr>
+          <td class="channel">${channel}</td>
+          <td><code>${url}</code></td>
+          <td>${historyHtml}</td>
+        </tr>`;
+      }
+      html += "</table>";
+      container.innerHTML = html;
+    }
+
+    loadDashboard();
+  </script>
+</body>
+</html>
