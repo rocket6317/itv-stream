@@ -18,7 +18,7 @@
 </head>
 <body>
   <h1>ITV Redirect Dashboard</h1>
-  <div id="status">⏳ Checking background task status...</div>
+  <div id="status">✅ Expiry-based refresh only. No background polling.</div>
   <div id="dashboard"></div>
 
   <script>
@@ -26,7 +26,6 @@
       const now = Math.floor(Date.now() / 1000);
       const secondsLeft = expiryTimestamp - now;
       if (secondsLeft <= 0) return "Expired";
-
       const hours = Math.floor(secondsLeft / 3600);
       const minutes = Math.floor((secondsLeft % 3600) / 60);
       return `${hours}h ${minutes}m remaining`;
@@ -36,20 +35,6 @@
       const res = await fetch("/dashboard/json");
       const data = await res.json();
       const container = document.getElementById("dashboard");
-      const status = document.getElementById("status");
-
-      let active = false;
-      for (const elapsed of Object.values(data.elapsed)) {
-        const hours = parseInt(elapsed.split("h")[0]);
-        if (!isNaN(hours) && hours < 3) {
-          active = true;
-          break;
-        }
-      }
-
-      status.textContent = active
-        ? "✅ Background task is running and updating links."
-        : "⚠️ No recent updates. Background task may not be running.";
 
       let html = "";
       for (const [channel, latestUrl] of Object.entries(data.latest)) {
@@ -57,4 +42,37 @@
         const count = data.counts?.[channel] || history.length;
         const elapsed = data.elapsed?.[channel] || "";
         const diffHtml = data.diffs?.[channel] || "";
-        const expiry = data.expiry?.[channel] ||
+        const expiry = data.expiry?.[channel] || 0;
+        const validity = data.validity?.[channel] || 0;
+        const countdown = formatCountdown(expiry);
+        const validityText = validity > 0
+          ? `${Math.floor(validity / 3600)}h ${Math.floor((validity % 3600) / 60)}m total`
+          : "Unknown";
+
+        html += `<h2 class="channel">${channel} (${count}) 
+          <span class="elapsed">– updated ${elapsed}</span>
+          <span class="expiry">| expires in ${countdown}</span>
+          <span class="expiry">| validity: ${validityText}</span>
+        </h2>`;
+
+        html += `<table><tr><th>Stream URL</th><th>Updated At</th></tr>`;
+        html += `<tr>
+          <td class="link">${diffHtml}</td>
+          <td>${history[history.length - 1].timestamp}</td>
+        </tr>`;
+
+        for (let i = history.length - 2; i >= 0; i--) {
+          html += `<tr>
+            <td class="link"><code>${history[i].url}</code></td>
+            <td>${history[i].timestamp}</td>
+          </tr>`;
+        }
+
+        html += `</table>`;
+      }
+
+      container.innerHTML = html;
+    }
+
+    loadDashboard();
+  </
