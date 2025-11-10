@@ -2,7 +2,7 @@ import asyncio
 import logging
 import os
 from fastapi import FastAPI, Request, HTTPException, Depends
-from fastapi.responses import RedirectResponse
+from fastapi.responses import RedirectResponse, PlainTextResponse
 from fastapi.templating import Jinja2Templates
 from fastapi.security import HTTPBasic, HTTPBasicCredentials
 from starlette.status import HTTP_401_UNAUTHORIZED
@@ -33,7 +33,7 @@ async def redirect_itv(channel: str):
     if not url:
         url = await fetch_stream_url(channel)
         set_cached_url(channel, url)
-    return RedirectResponse(url)
+    return RedirectResponse(url, status_code=307)
 
 @app.get("/dashboard")
 async def dashboard(
@@ -52,6 +52,25 @@ async def dashboard_json(credentials: HTTPBasicCredentials = Depends(security)):
 @app.get("/raw")
 async def raw_manifest():
     return RedirectResponse("https://example.com/static.mpd")
+
+@app.get("/playlist/{channel}.m3u8")
+async def channel_playlist(channel: str):
+    url = get_cached_url(channel)
+    if not url:
+        raise HTTPException(status_code=404, detail="Stream not available")
+    content = f"""#EXTM3U
+#EXTINF:-1 tvg-id="{channel}" group-title="ITV", {channel}
+{url}
+"""
+    return PlainTextResponse(content, media_type="application/x-mpegURL")
+
+@app.get("/playlist.m3u")
+async def master_playlist():
+    lines = ["#EXTM3U"]
+    for channel in CHANNELS:
+        lines.append(f"#EXTINF:-1 tvg-id=\"{channel}\" group-title=\"ITV\", {channel}")
+        lines.append(f"https://py.273272.xyz/playlist/{channel}.m3u8")
+    return PlainTextResponse("\n".join(lines), media_type="application/x-mpegURL")
 
 @app.on_event("startup")
 async def startup_event():
