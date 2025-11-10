@@ -28,13 +28,10 @@ def check_auth(credentials: HTTPBasicCredentials):
 
 @app.get("/itvx")
 async def redirect_itv(channel: str):
-    entry = get_cached_url(channel)
-    if not entry:
-        url = await fetch_stream_url(channel)
-        set_cached_url(channel, url)
-    else:
-        url = entry["url"]
-    return RedirectResponse(url, status_code=307)
+    entry = peek_cached_entry(channel)
+    if entry:
+        return RedirectResponse(entry["url"], status_code=307)
+    raise HTTPException(status_code=503, detail="Stream not ready or expired")
 
 @app.get("/dashboard")
 async def dashboard(
