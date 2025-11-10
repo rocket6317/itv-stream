@@ -59,11 +59,7 @@ async def channel_playlist(channel: str):
     url = get_cached_url(channel)
     if not url:
         raise HTTPException(status_code=404, detail="Stream not available")
-    content = f"""#EXTM3U
-#EXTINF:-1 tvg-id="{channel}" group-title="ITV", {channel}
-{url}
-"""
-    return PlainTextResponse(content, media_type="application/x-mpegURL")
+    return PlainTextResponse(url, media_type="application/x-mpegURL")
 
 @app.get("/playlist.m3u")
 async def master_playlist():
