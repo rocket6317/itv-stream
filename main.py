@@ -1,5 +1,6 @@
 import os
 import secrets
+import asyncio
 from fastapi import FastAPI, Request, Response, Depends, HTTPException, status
 from fastapi.responses import RedirectResponse, JSONResponse, HTMLResponse
 from fastapi.templating import Jinja2Templates
@@ -16,6 +17,8 @@ security = HTTPBasic()
 USERNAME = os.environ["DASHBOARD_USER"]
 PASSWORD = os.environ["DASHBOARD_PASS"]
 
+CHANNELS = ["ITV", "ITV2", "ITV3", "ITV4", "ITVBe"]
+
 def authenticate(credentials: HTTPBasicCredentials = Depends(security)):
     correct_username = secrets.compare_digest(credentials.username, USERNAME)
     correct_password = secrets.compare_digest(credentials.password, PASSWORD)
@@ -25,6 +28,21 @@ def authenticate(credentials: HTTPBasicCredentials = Depends(security)):
             detail="Invalid credentials",
             headers={"WWW-Authenticate": "Basic"},
         )
+
+@app.on_event("startup")
+async def start_background_tasks():
+    async def auto_check_loop():
+        while True:
+            for channel in CHANNELS:
+                try:
+                    stream_url = await fetch_stream_url(channel)
+                    set_cached_url(channel, stream_url)
+                    record_link(channel, stream_url)
+                except Exception as e:
+                    print(f"[ERROR] Failed to update {channel}: {e}")
+            await asyncio.sleep(7200)  # wait 2 hours
+
+    asyncio.create_task(auto_check_loop())
 
 @app.get("/itvx")
 async def redirect_itv(request: Request):
