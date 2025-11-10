@@ -3,28 +3,68 @@
 <head>
     <title>ITV Redirect Dashboard</title>
     <style>
-        body { background: #111; color: #eee; font-family: sans-serif; }
-        table { width: 100%; border-collapse: collapse; margin-top: 20px; }
-        th, td { padding: 10px; border-bottom: 1px solid #444; }
-        th { background: #222; }
+        body {
+            background: #111;
+            color: #eee;
+            font-family: sans-serif;
+            margin: 0;
+            padding: 20px;
+        }
+        h1 {
+            margin-bottom: 20px;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            table-layout: auto; /* allows flexible column widths */
+        }
+        th, td {
+            padding: 10px;
+            text-align: left; /* aligns headers and cells consistently */
+            border-bottom: 1px solid #444;
+            vertical-align: top;
+        }
+        th {
+            background: #222;
+            font-weight: bold;
+        }
+        a {
+            color: #4fc3f7;
+            text-decoration: none;
+        }
+        a:hover {
+            text-decoration: underline;
+        }
     </style>
     <script>
-        setTimeout(() => location.reload(), 60000);
+        setTimeout(() => location.reload(), 60000); // auto-refresh every 60s
     </script>
 </head>
 <body>
     <h1>ITV Redirect Dashboard</h1>
     <table>
-        <tr><th>Channel</th><th>Expires In</th><th>Expires At</th><th>Requests</th><th>URL</th></tr>
-        {% for stream in data.streams %}
-        <tr>
-            <td>{{ stream.channel }}</td>
-            <td>{{ stream.expires_in }}</td>
-            <td>{{ stream.expires_at }}</td>
-            <td>{{ stream.requests }}</td>
-            <td><a href="{{ stream.url }}" target="_blank">Link</a></td>
-        </tr>
-        {% endfor %}
+        <thead>
+            <tr>
+                <th>Channel</th>
+                <th>Cached At</th>
+                <th>Expires At</th>
+                <th>Next Refresh</th>
+                <th>Requests</th>
+                <th>URL</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for stream in data.streams %}
+            <tr>
+                <td>{{ stream.channel }}</td>
+                <td>{{ stream.cached_at }}</td>
+                <td>{{ stream.expires_at }}</td>
+                <td>{{ stream.next_refresh_at }}</td>
+                <td>{{ stream.requests }}</td>
+                <td><a href="{{ stream.url }}" target="_blank">Link</a></td>
+            </tr>
+            {% endfor %}
+        </tbody>
     </table>
 </body>
 </html>
