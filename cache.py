@@ -19,3 +19,11 @@ def set_cached_url(channel: str, url: str, ttl: int = 21600):
         "expires_at": now + timedelta(seconds=ttl),
         "requests": 0
     }
+
+def peek_cached_entry(channel: str):
+    entry = CACHE.get(channel)
+    if not entry:
+        return None
+    if entry["expires_at"] < datetime.utcnow():
+        return None
+    return entry
