@@ -1,37 +1,65 @@
-# ITV Redirect Dashboard
+# 📺 ITV Redirect Dashboard
 
-Stream ITV channels on IPTV players that support **clearkey**.  
-A lightweight FastAPI dashboard for managing and monitoring ITV stream redirects via JWT-based MPD links. Designed for IPTV setups using expiry-based caching — no background polling required.
-
-[![ko-fi](https://ko-fi.com/img/githubbutton_sm.svg)](https://ko-fi.com/M4M31NTEGN)
+Use this tool to generate valid, auto-refreshing stream links for ITV channels. It handles token expiry automatically (gets/caches/refreshes/serves the links) and provides a simple dashboard to monitor stream activity.
 
 ---
 
-## 🚀 Features
+## ✅ What It Does
 
--  🔗 Automatically gets, caches, refreshes and serves the up-to-date ITV stream URLs that can be used in IPTV players. 
--  📊 Dashboard: /dashboard endpoint shows info about URLs. ie. live stream history, expiry, request count
--  🔐 Password-protected dashboard via environment variables 
--  🧠 Expiry-aware caching: Uses exp= timestamp from JWT to determine validity
--  🕒 Request tracking: Counts how many times each cached link is used
--  🌙 Dark mode + 🔄 Auto-refresh every 60 seconds
--  📦 Easy to deploy with Docker or Portainer  
+- Generates valid ITV stream links to be used with **clearkey capable IPTV players**
+- Automatically refreshes links when they expire
+- Tracks how many times each link is used
+- Shows expiry time and stream history in a web dashboard
 
 ---
 
-## USAGE ##
+## 🔗 How to Use
+
+### 1. Get a valid stream link
+
+After getting Flask (Gunicorn) up and running use below links in your m3u file to generate stream links
 Replace `your-server-ip` with your actual server IP or domain name.
 
-### Examples:
-- ITV1: `https://your-server-ip:1995/itvx?channel=ITV`
-- ITV2: `https://your-server-ip:1995/itvx?channel=ITV2`
-- ITV3: `https://your-server-ip:1995/itvx?channel=ITV3`
-- ITV4: `https://your-server-ip:1995/itvx?channel=ITV4`
-- ITV Quiz: `https://your-server-ip:1995/itvx?channel=ITVBe`
+**http://your-server-ip:1995/itvx?channel=ITV
+http://your-server-ip:1995/itvx?channel=ITV2
+http://your-server-ip:1995/itvx?channel=ITV3
+http://your-server-ip:1995/itvx?channel=ITV4
+http://your-server-ip:1995/itvx?channel=ITVBe**
 
-Paste these links into any **clearkey capable IPTV player**. You need to insert clearkeys in the m3u file. This app will only give you the streaming links.
+These links redirect to the latest valid MPD stream for each channel.
 
-## 🔐 Authentication for Dashboard
+---
+
+### 2. Use in IPTV players
+
+You must use a **Clearkey-capable IPTV player**, such as:
+
+- **OTT Navigator**
+- **TiviMate (with Clearkey support)**
+
+These players must support **DASH + Clearkey DRM**.
+
+You’ll need to insert the decryption keys manually into your `.m3u` playlist file. Example:
+
+
+---
+
+### 3. Monitor with the dashboard
+
+Visit:
+
+http://your-server-ip:1995/dashboard
+
+This shows:
+
+- Current stream link
+- Expiry time (human-readable)
+- Request count
+- Link history and changes
+
+---
+
+## 🔐 Set Username & Password
 
 Basic login is enforced using environment variables. After deploying the stack:
 
@@ -48,11 +76,7 @@ DASHBOARD_PASS=your_chosen_password
 
 ---
 
-## 📸 Dashboard Preview
-
-**Address:**
-
-http://your-server-ip:1995/dashboard
+[![ko-fi](https://ko-fi.com/img/githubbutton_sm.svg)](https://ko-fi.com/M4M31NTEGN)
 
 ---
 
@@ -62,7 +86,3 @@ MIT — free to use, modify, and share.
 
 ---
 
-## 🙋‍♂️ Contribute
-
-Pull requests welcome!  
-Ideas for auto-refresh, CSV export, or mobile layout? Let’s build it together.
