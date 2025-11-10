@@ -19,7 +19,7 @@ def set_cached_url(channel, url):
         "url": url,
         "expiry": expiry,
         "validity": validity,
-        "requests": 0  # reset count
+        "requests": 0
     }
     logger.info(f"[CACHE SET] {channel} | expiry: {expiry} | validity: {validity}s")
 
