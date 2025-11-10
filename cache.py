@@ -1,14 +1,14 @@
 from datetime import datetime
 import re
+import logging
 
-# In-memory cache store
+logger = logging.getLogger(__name__)
 cache_store = {}
 
 def extract_expiry(url):
     match = re.search(r"[?&]exp=(\d+)", url)
     if match:
         return int(match.group(1))
-    # Fallback: assume 1 hour validity if no exp= found
     return int(datetime.utcnow().timestamp()) + 3600
 
 def set_cached_url(channel, url):
@@ -18,13 +18,19 @@ def set_cached_url(channel, url):
     cache_store[channel] = {
         "url": url,
         "expiry": expiry,
-        "validity": validity
+        "validity": validity,
+        "requests": 0  # reset count
     }
+    logger.info(f"[CACHE SET] {channel} | expiry: {expiry} | validity: {validity}s")
 
 def get_cached_url(channel):
     entry = cache_store.get(channel)
-    if entry and entry["expiry"] > int(datetime.utcnow().timestamp()):
+    now = int(datetime.utcnow().timestamp())
+    if entry and entry["expiry"] > now:
+        entry["requests"] += 1
+        logger.info(f"[CACHE HIT] {channel} | count: {entry['requests']} | expires in {entry['expiry'] - now}s")
         return entry["url"]
+    logger.info(f"[CACHE MISS] {channel}")
     return None
 
 def get_cached_meta(channel):
