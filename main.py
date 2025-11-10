@@ -59,7 +59,7 @@ async def channel_playlist(channel: str):
     url = get_cached_url(channel)
     if not url:
         raise HTTPException(status_code=404, detail="Stream not available")
-    return PlainTextResponse(url, media_type="application/dash+xml")
+    return PlainTextResponse(url, media_type="text/plain")
 
 @app.get("/playlist.m3u")
 async def master_playlist():
