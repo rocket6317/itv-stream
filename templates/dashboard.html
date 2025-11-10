@@ -43,7 +43,9 @@
         const elapsed = data.elapsed?.[channel] || "";
         const diffHtml = data.diffs?.[channel] || "";
         const expiry = data.expiry?.[channel] || 0;
+        const expiryStr = data.expiry_str?.[channel] || "Unknown";
         const validity = data.validity?.[channel] || 0;
+        const requests = data.requests?.[channel] || 0;
         const countdown = formatCountdown(expiry);
         const validityText = validity > 0
           ? `${Math.floor(validity / 3600)}h ${Math.floor((validity % 3600) / 60)}m total`
@@ -52,6 +54,8 @@
         html += `<h2 class="channel">${channel} (${count}) 
           <span class="elapsed">– updated ${elapsed}</span>
           <span class="expiry">| expires in ${countdown}</span>
+          <span class="expiry">| expiry: ${expiryStr}</span>
+          <span class="expiry">| requests: ${requests}</span>
           <span class="expiry">| validity: ${validityText}</span>
         </h2>`;
 
