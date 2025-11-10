@@ -1,12 +1,19 @@
 import time
 import logging
 import difflib
+import threading
 from datetime import datetime
 
 logger = logging.getLogger(__name__)
 
 latest_links = {}
 link_history = {}
+
+CHANNELS = ["ITV", "ITV2", "ITV3", "ITV4", "ITVBe"]
+
+def fetch_stream_url(channel: str) -> str:
+    # Replace with actual logic to fetch the current stream URL
+    return f"https://stream.itv.com/live/{channel.lower()}.m3u8"
 
 def record_link(channel: str, new_url: str):
     current_url = latest_links.get(channel)
@@ -55,3 +62,12 @@ def get_dashboard_data():
         else:
             data["diffs"][channel] = f"<b>{history[-1]['url']}</b>"
     return data
+
+def auto_check_loop(interval_seconds=300):
+    def loop():
+        while True:
+            for channel in CHANNELS:
+                new_url = fetch_stream_url(channel)
+                record_link(channel, new_url)
+            time.sleep(interval_seconds)
+    threading.Thread(target=loop, daemon=True).start()
