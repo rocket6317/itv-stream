@@ -30,7 +30,7 @@ def check_auth(credentials: HTTPBasicCredentials):
 async def redirect_itv(channel: str):
     entry = peek_cached_entry(channel)
     if entry:
-        return RedirectResponse(entry["url"], status_code=307)
+        return RedirectResponse(entry["url"], status_code=302)
     raise HTTPException(status_code=503, detail="Stream not ready or expired")
 
 @app.get("/dashboard")
