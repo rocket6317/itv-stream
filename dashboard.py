@@ -2,7 +2,6 @@ import os
 from datetime import timedelta
 from cache import peek_cached_entry
 
-BASE_URL = os.getenv("BASE_URL", "https://example.com")
 REFRESH_INTERVAL = int(os.getenv("REFRESH_INTERVAL", "21300"))
 CHANNELS = ["ITV", "ITV2", "ITV3", "ITV4", "ITVBe"]
 
