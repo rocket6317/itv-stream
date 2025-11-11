@@ -28,7 +28,7 @@ def check_auth(credentials: HTTPBasicCredentials):
 
 @app.get("/itvx")
 async def redirect_itv(channel: str):
-    entry = peek_cached_entry(channel)
+    entry = get_cached_url(channel)  # ← this increments request count
     if entry:
         return RedirectResponse(entry["url"], status_code=302)
     raise HTTPException(status_code=503, detail="Stream not ready or expired")
