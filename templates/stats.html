@@ -1,0 +1,161 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>ITV Statistics</title>
+    <style>
+        body {
+            background: #111;
+            color: #eee;
+            font-family: sans-serif;
+            margin: 0;
+            padding: 20px;
+        }
+        h1 {
+            margin-bottom: 10px;
+        }
+        h2 {
+            margin-top: 30px;
+            margin-bottom: 15px;
+            font-size: 18px;
+            color: #4fc3f7;
+        }
+        .nav {
+            margin-bottom: 20px;
+        }
+        .nav a {
+            color: #4fc3f7;
+            text-decoration: none;
+            margin-right: 15px;
+        }
+        .nav a:hover {
+            text-decoration: underline;
+        }
+        .stat-box {
+            background: #222;
+            padding: 20px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+        }
+        .stat-row {
+            display: flex;
+            justify-content: space-between;
+            padding: 10px 0;
+            border-bottom: 1px solid #333;
+        }
+        .stat-row:last-child {
+            border-bottom: none;
+        }
+        .stat-label {
+            color: #aaa;
+        }
+        .stat-value {
+            font-weight: bold;
+            font-size: 18px;
+        }
+        .highlight {
+            color: #4fc3f7;
+        }
+        .warning {
+            color: #ff9800;
+        }
+        .no-data {
+            color: #666;
+            font-style: italic;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 14px;
+        }
+        th, td {
+            padding: 8px 12px;
+            text-align: left;
+            border-bottom: 1px solid #444;
+        }
+        th {
+            background: #222;
+            font-weight: bold;
+        }
+        .timestamp {
+            color: #aaa;
+            font-size: 12px;
+        }
+    </style>
+    <script>
+        setTimeout(() => location.reload(), 60000);
+    </script>
+</head>
+<body>
+    <h1>ITV Statistics & Analytics</h1>
+    <div class="nav">
+        <a href="/dashboard">Dashboard</a>
+        <a href="/stats">Statistics</a>
+        <a href="/logs">Logs</a>
+    </div>
+
+    {% if token_stats %}
+    <div class="stat-box">
+        <h2>Token Refresh History</h2>
+        <div class="stat-row">
+            <span class="stat-label">Total Refreshes:</span>
+            <span class="stat-value highlight">{{ token_stats.total_refreshes }}</span>
+        </div>
+        <div class="stat-row">
+            <span class="stat-label">Avg Time Between Refreshes:</span>
+            <span class="stat-value">{{ "%.1f"|format(token_stats.avg_hours_between) }} hours</span>
+        </div>
+        <div class="stat-row">
+            <span class="stat-label">Min Time:</span>
+            <span class="stat-value">{{ "%.1f"|format(token_stats.min_hours) }} hours</span>
+        </div>
+        <div class="stat-row">
+            <span class="stat-label">Max Time:</span>
+            <span class="stat-value">{{ "%.1f"|format(token_stats.max_hours) }} hours</span>
+        </div>
+        <div class="stat-row">
+            <span class="stat-label">Last Refresh:</span>
+            <span class="stat-value timestamp">{{ token_stats.last_refresh }}</span>
+        </div>
+        {% if token_stats.avg_hours_between >= 48 %}
+        <p class="warning" style="margin-top: 15px;">Note: Token lasts {{ "%.0f"|format(token_stats.avg_hours_between) }} hours on average. Automation may not be critical.</p>
+        {% elif token_stats.avg_hours_between < 24 %}
+        <p class="warning" style="margin-top: 15px;">Note: Token expires every {{ "%.0f"|format(token_stats.avg_hours_between) }} hours. Automation recommended.</p>
+        {% endif %}
+    </div>
+    {% else %}
+    <div class="stat-box">
+        <h2>Token Refresh History</h2>
+        <p class="no-data">No token refresh events logged yet.</p>
+        <p style="color: #666; font-size: 14px;">This will populate after you reload the token a few times. Use the <code>/admin/reload-token</code> endpoint to manually refresh.</p>
+    </div>
+    {% endif %}
+
+    <h2>Recent URL Refreshes by Channel</h2>
+    {% for channel in channels %}
+    <div class="stat-box">
+        <h3>{{ channel }}</h3>
+        {% if channel_stats[channel] %}
+        <table>
+            <thead>
+                <tr>
+                    <th style="width: 160px;">Time</th>
+                    <th>URL Preview</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for event in reversed(channel_stats[channel]) %}
+                <tr>
+                    <td class="timestamp">{{ event.timestamp }}</td>
+                    <td style="font-family: monospace; font-size: 12px;">{{ event.details.url if event.details and event.details.url else '-' }}</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+        {% else %}
+        <p class="no-data">No events logged yet for {{ channel }}</p>
+        {% endif %}
+    </div>
+    {% endfor %}
+
+</body>
+</html>
