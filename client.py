@@ -3,6 +3,7 @@ import os
 import json
 import logging
 from fastapi import HTTPException
+from change_log import log_change
 
 logger = logging.getLogger("uvicorn")
 
@@ -133,8 +134,12 @@ async def fetch_stream_url(channel: str) -> str:
             logger.info(f"Response status: {response.status_code}")
             if response.status_code != 200:
                 logger.error(f"Response body: {response.text[:500]}")
+                log_change('url_error', channel, {'status': response.status_code, 'body': response.text[:500]})
             response.raise_for_status()
-            return response.json()['Playlist']['Video']['VideoLocations'][0]['Url']
+            url = response.json()['Playlist']['Video']['VideoLocations'][0]['Url']
+            log_change('url_refresh', channel, {'url': url[:200]})  # Log first 200 chars
+            return url
         except Exception as e:
             logger.error(f"Failed to fetch stream URL: {e}")
+            log_change('url_error', channel, {'error': str(e)})
             raise HTTPException(status_code=502, detail=f"Failed to fetch stream URL: {e}")
