@@ -86,7 +86,7 @@
             </tr>
         </thead>
         <tbody>
-            {% for log in reversed(logs) %}
+            {% for log in logs|reverse %}
             <tr>
                 <td class="timestamp">{{ log.timestamp }}</td>
                 <td>
