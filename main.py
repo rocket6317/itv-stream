@@ -10,7 +10,16 @@ from dotenv import load_dotenv
 from dashboard import get_dashboard_data
 from cache import get_cached_url, set_cached_url, peek_cached_entry
 from client import fetch_stream_url
-from change_log import get_logs, get_token_history, get_url_history
+
+# Try to import change_log, handle if not available
+try:
+    from change_log import get_logs, get_token_history, get_url_history
+    CHANGE_LOG_AVAILABLE = True
+except ImportError:
+    CHANGE_LOG_AVAILABLE = False
+    def get_logs(limit=100): return []
+    def get_token_history(): return None
+    def get_url_history(channel=None): return []
 
 app = FastAPI()
 templates = Jinja2Templates(directory="templates")
