@@ -143,7 +143,7 @@
                 </tr>
             </thead>
             <tbody>
-                {% for event in reversed(channel_stats[channel]) %}
+                {% for event in channel_stats[channel]|reverse %}
                 <tr>
                     <td class="timestamp">{{ event.timestamp }}</td>
                     <td style="font-family: monospace; font-size: 12px;">{{ event.details.url if event.details and event.details.url else '-' }}</td>
