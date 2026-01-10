@@ -30,11 +30,15 @@ def get_cookies_and_user_id():
     if access_token:
         logger.info("Using ITV_ACCESS_TOKEN from environment")
 
-    # Read any additional cookies
+    # Read any additional cookies (supports both old and new naming)
     for key, value in os.environ.items():
         if key.startswith('ITV_COOKIE_'):
             cookie_name = key.replace('ITV_COOKIE_', '')
             cookies[cookie_name] = value
+        elif key == 'ITV_COOKIE_CONSENT':
+            cookies['Itv.cck'] = value
+        elif key == 'ITV_COOKIE_CLIENT_ID':
+            cookies['Itv.Cid'] = value
 
     # If no user ID or access token, try to parse from Itv.Session cookie
     if not user_id or not access_token:
