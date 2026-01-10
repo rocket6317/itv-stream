@@ -128,8 +128,12 @@ async def view_logs(
 ):
     """View recent change logs."""
     check_auth(credentials)
-    logs = get_logs(100)
-    return templates.TemplateResponse("logs.html", {"request": request, "logs": logs})
+    try:
+        logs = get_logs(100)
+        return templates.TemplateResponse("logs.html", {"request": request, "logs": logs})
+    except Exception as e:
+        logger.error(f"Error in /logs: {e}")
+        return templates.TemplateResponse("logs.html", {"request": request, "logs": []})
 
 @app.get("/logs/json")
 async def view_logs_json(credentials: HTTPBasicCredentials = Depends(security)):
@@ -144,16 +148,29 @@ async def view_stats(
 ):
     """View statistics about token and URL changes."""
     check_auth(credentials)
-    token_stats = get_token_history()
-    channel_stats = {}
-    for ch in CHANNELS:
-        channel_stats[ch] = get_url_history(ch)[-10:]
-    return templates.TemplateResponse("stats.html", {
-        "request": request,
-        "token_stats": token_stats,
-        "channel_stats": channel_stats,
-        "channels": CHANNELS
-    })
+    try:
+        token_stats = get_token_history()
+        channel_stats = {}
+        for ch in CHANNELS:
+            try:
+                history = get_url_history(ch)
+                channel_stats[ch] = history[-10:] if history else []
+            except Exception:
+                channel_stats[ch] = []
+        return templates.TemplateResponse("stats.html", {
+            "request": request,
+            "token_stats": token_stats,
+            "channel_stats": channel_stats,
+            "channels": CHANNELS
+        })
+    except Exception as e:
+        logger.error(f"Error in /stats: {e}")
+        return templates.TemplateResponse("stats.html", {
+            "request": request,
+            "token_stats": None,
+            "channel_stats": {ch: [] for ch in CHANNELS},
+            "channels": CHANNELS
+        })
 
 @app.get("/stats/json")
 async def view_stats_json(credentials: HTTPBasicCredentials = Depends(security)):
@@ -162,4 +179,14 @@ async def view_stats_json(credentials: HTTPBasicCredentials = Depends(security))
     return {
         'token': get_token_history(),
         'channels': {ch: get_url_history(ch)[-10:] for ch in CHANNELS}
+    }
+
+@app.get("/debug")
+async def debug_info():
+    """Debug endpoint to check if new files are loaded."""
+    import os
+    return {
+        "change_log_exists": os.path.exists('/app/change_log.py'),
+        "templates_exist": os.path.exists('/app/templates/logs.html'),
+        "files_in_app": os.listdir('/app') if os.path.exists('/app') else [],
     }
