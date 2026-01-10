@@ -1,0 +1,117 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>ITV Change Logs</title>
+    <style>
+        body {
+            background: #111;
+            color: #eee;
+            font-family: sans-serif;
+            margin: 0;
+            padding: 20px;
+        }
+        h1 {
+            margin-bottom: 10px;
+        }
+        .nav {
+            margin-bottom: 20px;
+        }
+        .nav a {
+            color: #4fc3f7;
+            text-decoration: none;
+            margin-right: 15px;
+        }
+        .nav a:hover {
+            text-decoration: underline;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 14px;
+        }
+        th, td {
+            padding: 8px 12px;
+            text-align: left;
+            border-bottom: 1px solid #444;
+            vertical-align: top;
+        }
+        th {
+            background: #222;
+            font-weight: bold;
+        }
+        .event-type {
+            padding: 2px 8px;
+            border-radius: 3px;
+            font-size: 12px;
+            font-weight: bold;
+        }
+        .url-refresh { background: #2e7d32; }
+        .url-error { background: #c62828; }
+        .token-refresh { background: #1565c0; }
+        .timestamp {
+            color: #aaa;
+            font-size: 12px;
+        }
+        .details {
+            font-family: monospace;
+            font-size: 12px;
+            color: #aaa;
+        }
+        .empty {
+            padding: 40px;
+            text-align: center;
+            color: #666;
+        }
+    </style>
+    <script>
+        setTimeout(() => location.reload(), 60000);
+    </script>
+</head>
+<body>
+    <h1>ITV Change Logs</h1>
+    <div class="nav">
+        <a href="/dashboard">Dashboard</a>
+        <a href="/stats">Statistics</a>
+        <a href="/logs">Logs</a>
+    </div>
+
+    {% if logs %}
+    <table>
+        <thead>
+            <tr>
+                <th style="width: 160px;">Time</th>
+                <th style="width: 100px;">Type</th>
+                <th style="width: 80px;">Channel</th>
+                <th>Details</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for log in reversed(logs) %}
+            <tr>
+                <td class="timestamp">{{ log.timestamp }}</td>
+                <td>
+                    <span class="event-type {{ log.event_type.replace('_', '-') }}">
+                        {{ log.event_type }}
+                    </span>
+                </td>
+                <td>{{ log.channel }}</td>
+                <td class="details">
+                    {% if log.details %}
+                        {% if log.details.url %}URL: {{ log.details.url }}{% endif %}
+                        {% if log.details.error %}Error: {{ log.details.error }}{% endif %}
+                        {% if log.details.status %}Status: {{ log.details.status }}{% endif %}
+                        {% if log.details.body %}{{ log.details.body[:100] }}{% endif %}
+                    {% endif %}
+                </td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+    {% else %}
+    <div class="empty">
+        <p>No logs yet. Logs will appear here as URLs are refreshed and tokens are updated.</p>
+        <p>This may take a few hours to populate data.</p>
+    </div>
+    {% endif %}
+</body>
+</html>
